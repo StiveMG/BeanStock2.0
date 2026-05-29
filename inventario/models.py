@@ -21,7 +21,7 @@ class Insumo(models.Model):
     id_producto = models.CharField(max_length=20, primary_key=True, unique=True)
     nombre = models.CharField(max_length=100)
     cantidad = models.FloatField(default=0.0)
-    # Aplicamos la restricción de unidades
+    
     unidad_medida = models.CharField(
         max_length=20, 
         choices=UNIDADES_CHOICES, 
