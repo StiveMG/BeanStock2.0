@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>BeanStock - Operaciones</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background-color: #3498db; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #2980b9; }
+        .hidden { display: none; }
+        .card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BeanStock - Panel de Control</h1>
+        
+        <div id="auth-section">
+            <h2>Acceso al Sistema</h2>
+            <input type="text" id="username" placeholder="Usuario">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="iniciarSesion()">Iniciar Sesión</button>
+            <button onclick="registrar()" style="background-color: #27ae60;">Crear Cuenta Nueva</button>
+            <p id="auth-msg"></p>
+        </div>
+
+        <div id="dashboard-section" class="hidden">
+            <button onclick="cerrarSesion()" style="background-color: #e74c3c;">Cerrar Sesión</button>
+            <h2>Inventario de Bebidas</h2>
+            <button onclick="cargarBebidas()">Actualizar Inventario</button>
+            <div id="lista-bebidas"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000/api/";
+
+        async function registrar() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const res = await fetch(API_URL + "registro/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            const data = await res.json();
+            document.getElementById('auth-msg').innerText = data.mensaje || data.error;
+        }
+
+        async function iniciarSesion() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const res = await fetch(API_URL + "token/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem("access_token", data.access);
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                cargarBebidas();
+            } else {
+                document.getElementById('auth-msg').innerText = "Credenciales incorrectas";
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem("access_token");
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+        }
+
+        async function cargarBebidas() {
+            const token = localStorage.getItem("access_token");
+            const res = await fetch(API_URL + "bebidas/", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            
+            if (res.status === 401) {
+                cerrarSesion();
+                alert("Tu sesión ha caducado");
+                return;
+            }
+
+            const bebidas = await res.json();
+            const contenedor = document.getElementById('lista-bebidas');
+            contenedor.innerHTML = "";
+            
+            bebidas.forEach(b => {
+                contenedor.innerHTML += `
+                    <div class="card">
+                        <strong>${b.nombre}</strong> (ID: ${b.id_producto})<br>
+                        Stock: ${b.cantidad} | Precio: $${b.precio_venta}
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
