@@ -1,0 +1,21 @@
+body { 
+    background-size: 24px 24px; 
+}
+.glass-panel { 
+    background: rgba(255, 255, 255, 0.95); 
+    backdrop-filter: blur(10px); 
+}
+.toast-enter { 
+    animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; 
+}
+.toast-leave { 
+    animation: fadeOutRight 0.3s ease-in forwards; 
+}
+@keyframes slideInRight { 
+    from { transform: translateX(100%); opacity: 0; } 
+    to { transform: translateX(0); opacity: 1; } 
+}
+@keyframes fadeOutRight { 
+    from { transform: translateX(0); opacity: 1; } 
+    to { transform: translateX(100%); opacity: 0; } 
+}
