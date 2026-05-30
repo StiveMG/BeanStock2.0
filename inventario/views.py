@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.shortcuts import render
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -17,6 +18,9 @@ def registrar_usuario(request):
         
     User.objects.create_user(username=username, password=password)
     return Response({"mensaje": "Usuario creado exitosamente"}, status=201)
+
+def frontend(request):
+    return render(request, 'app.html')
 
 class InsumoViewSet(viewsets.ModelViewSet):
     queryset = Insumo.objects.all()

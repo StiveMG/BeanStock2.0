@@ -19,6 +19,8 @@ class ProduccionSerializer(serializers.ModelSerializer):
 
 class VentaSerializer(serializers.ModelSerializer):
     nombre_bebida = serializers.ReadOnlyField(source='bebida.nombre')
+    precio_unitario = serializers.ReadOnlyField(source='bebida.precio_venta')
+    
     class Meta:
         model = Venta
         fields = '__all__'
