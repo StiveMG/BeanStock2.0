@@ -2,7 +2,7 @@ from django.db import models
 from rest_framework.exceptions import ValidationError
 
 class ProductoBase(models.Model):
-    id_producto = models.CharField(max_length=20, primary_key=True, unique=True)
+    id_producto = models.CharField(max_length=20, primary_key=True, unique=True, blank=True)
     nombre = models.CharField(max_length=100)
     cantidad = models.FloatField(default=0.0)
 
@@ -18,7 +18,7 @@ class Insumo(models.Model):
         ('Mililitros', 'Mililitros'),
     ]
     
-    id_producto = models.CharField(max_length=20, primary_key=True, unique=True)
+    id_producto = models.CharField(max_length=20, primary_key=True, unique=True, blank=True)
     nombre = models.CharField(max_length=100)
     cantidad = models.FloatField(default=0.0)
     
@@ -32,13 +32,33 @@ class Insumo(models.Model):
         verbose_name = "Insumo"
         verbose_name_plural = "Insumos"
 
+    def save(self, *args, **kwargs):
+        if not self.id_producto:
+            ultimo = Insumo.objects.all().order_by('id_producto').last()
+            if ultimo and ultimo.id_producto.startswith('INS-'):
+                numero = int(ultimo.id_producto.split('-')[1]) + 1
+                self.id_producto = f"INS-{numero:02d}"
+            else:
+                self.id_producto = "INS-01"
+        super().save(*args, **kwargs)
+
 class Bebida(ProductoBase):
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2)
-    receta = models.JSONField(default=dict, help_text="Ejemplo: {'INS-01': 15, 'INS-02': 200}")
+    receta = models.JSONField(default=dict)
 
     class Meta:
         verbose_name = "Bebida"
         verbose_name_plural = "Bebidas"
+
+    def save(self, *args, **kwargs):
+        if not self.id_producto:
+            ultimo = Bebida.objects.all().order_by('id_producto').last()
+            if ultimo and ultimo.id_producto.startswith('BEB-'):
+                numero = int(ultimo.id_producto.split('-')[1]) + 1
+                self.id_producto = f"BEB-{numero:02d}"
+            else:
+                self.id_producto = "BEB-01"
+        super().save(*args, **kwargs)
 
 class Produccion(models.Model):
     bebida = models.ForeignKey(Bebida, on_delete=models.CASCADE)
@@ -55,12 +75,12 @@ class Produccion(models.Model):
             try:
                 insumo = Insumo.objects.get(id_producto=id_insumo)
             except Insumo.DoesNotExist:
-                raise ValidationError({"error": f"La receta pide el insumo '{id_insumo}' pero ya no existe en bodega."})
+                raise ValidationError({"error": f"La receta exige el código '{id_insumo}', pero este ingrediente fue eliminado de la bodega. Por favor, actualiza la receta de la bebida."})
             
             consumo_total = cantidad_necesaria * self.cantidad_preparada
             if insumo.cantidad < consumo_total:
                 raise ValidationError({
-                    "error": f"Faltan insumos. Necesitas {consumo_total} {insumo.unidad_medida} de {insumo.nombre}."
+                    "error": f"Falta {insumo.nombre}. Tienes {insumo.cantidad} {insumo.unidad_medida} y necesitas {consumo_total} {insumo.unidad_medida}."
                 })
 
         for id_insumo, cantidad_necesaria in receta_dict.items():
@@ -81,7 +101,7 @@ class Venta(models.Model):
     def save(self, *args, **kwargs):
         if self.bebida.cantidad < self.cantidad_vendida:
             raise ValidationError({
-                "error": f"Stock insuficiente de {self.bebida.nombre}. Hay {self.bebida.cantidad} y quieres vender {self.cantidad_vendida}."
+                "error": f"Stock insuficiente de {self.bebida.nombre}. Hay {self.bebida.cantidad} unidades y quieres vender {self.cantidad_vendida}."
             })
 
         self.bebida.cantidad -= self.cantidad_vendida

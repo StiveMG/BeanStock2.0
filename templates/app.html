@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeanStock - Gestión Profesional</title>
+    <title>BeanStock - ERP Cafetería</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        coffee: { 50: '#fdf8f5', 100: '#f5e8df', 500: '#cba68b', 800: '#4a3b32', 900: '#2c2119' }
+                        coffee: { 50: '#fcf9f7', 100: '#f5e8df', 500: '#cba68b', 800: '#4a3b32', 900: '#2c2119' },
+                        accent: { 500: '#d35400', 600: '#a84300' }
+                    },
+                    backgroundImage: {
+                        'pattern': "radial-gradient(#cba68b 1px, transparent 1px)"
                     }
                 }
             }
@@ -18,206 +22,264 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .toast-enter { animation: slideInRight 0.3s ease-out forwards; }
-        .toast-leave { animation: fadeOut 0.3s ease-in forwards; }
+        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        .toast-leave { animation: fadeOutRight 0.3s ease-in forwards; }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        body { background-size: 24px 24px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="bg-coffee-50 text-coffee-900 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-coffee-50 bg-pattern text-coffee-900 font-sans antialiased min-h-screen flex flex-col selection:bg-coffee-500 selection:text-white">
 
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+    <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3"></div>
 
-    <nav class="bg-coffee-900 text-white shadow-xl">
-        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-mug-hot text-2xl text-coffee-500"></i>
-                    <span class="font-bold text-2xl tracking-wider">BeanStock</span>
+    <nav class="bg-coffee-900 text-white shadow-2xl sticky top-0 z-40 border-b-4 border-coffee-500">
+        <div class="max-w-[1600px] mx-auto px-6">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-4 group cursor-pointer">
+                    <div class="bg-coffee-800 p-3 rounded-xl group-hover:bg-coffee-500 transition-colors duration-300">
+                        <i class="fa-solid fa-mug-hot text-2xl text-white"></i>
+                    </div>
+                    <span class="font-black text-3xl tracking-widest uppercase">BeanStock</span>
                 </div>
-                <div id="nav-logout" class="hidden flex items-center">
-                    <span id="user-display" class="mr-4 font-medium text-coffee-100"></span>
-                    <button onclick="cerrarSesion()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition shadow">
-                        <i class="fa-solid fa-power-off mr-2"></i>Salir
+                <div id="nav-logout" class="hidden flex items-center gap-6">
+                    <div class="hidden md:flex flex-col text-right">
+                        <span class="text-xs text-coffee-500 font-bold uppercase tracking-wider">Operador en turno</span>
+                        <span id="user-display" class="font-bold text-lg"></span>
+                    </div>
+                    <button onclick="cerrarSesion()" class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-5 rounded-xl transition-all shadow-lg hover:shadow-red-500/50 flex items-center font-bold">
+                        <i class="fa-solid fa-power-off mr-2"></i>Cerrar Caja
                     </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="flex-grow w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex-grow w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
         
-        <div id="auth-section" class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden p-8 mt-10 border-t-8 border-coffee-800">
-            <div class="text-center mb-8">
-                <i class="fa-solid fa-user-circle text-6xl text-coffee-500 mb-3"></i>
-                <h2 class="text-3xl font-bold text-coffee-900">Iniciar Turno</h2>
+        <div id="auth-section" class="max-w-md mx-auto glass-panel rounded-3xl shadow-2xl overflow-hidden p-10 mt-12 border border-white">
+            <div class="text-center mb-10">
+                <div class="inline-block bg-coffee-100 p-5 rounded-full mb-4 shadow-inner">
+                    <i class="fa-solid fa-user-lock text-5xl text-coffee-800"></i>
+                </div>
+                <h2 class="text-3xl font-black text-coffee-900">Portal Operativo</h2>
             </div>
-            
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Usuario de Acceso</label>
-                    <input type="text" id="username" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 outline-none transition">
+            <div class="space-y-6">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="username" placeholder="Usuario" class="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-coffee-500 focus:ring-0 outline-none transition font-medium text-lg">
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Contraseña</label>
-                    <input type="password" id="password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 outline-none transition">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-key text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password" placeholder="Contraseña" class="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-coffee-500 focus:ring-0 outline-none transition font-medium text-lg">
                 </div>
-                
-                <div class="pt-4 flex flex-col gap-3">
-                    <button onclick="iniciarSesion()" class="w-full bg-coffee-800 text-white py-3 rounded-lg hover:bg-coffee-900 transition font-bold text-lg shadow-lg">
-                        <i class="fa-solid fa-door-open mr-2"></i> Ingresar
+                <div class="pt-6 flex flex-col gap-4">
+                    <button onclick="iniciarSesion()" class="w-full bg-coffee-800 text-white py-4 rounded-xl hover:bg-coffee-900 transition-all font-black text-lg shadow-xl hover:shadow-coffee-900/40 hover:-translate-y-1">
+                        Iniciar Sesión
                     </button>
-                    <button onclick="registrar()" class="w-full bg-transparent text-coffee-800 py-2 rounded-lg hover:bg-coffee-100 transition font-semibold border-2 border-coffee-800">
-                        Crear Nuevo Usuario
+                    <button onclick="registrar()" class="w-full bg-white text-coffee-800 py-3 rounded-xl hover:bg-coffee-50 transition-all font-bold border-2 border-coffee-800 hover:shadow-md">
+                        Registrar Credenciales
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="dashboard-section" class="hidden flex flex-col lg:flex-row gap-8 h-full">
+        <div id="dashboard-section" class="hidden h-full">
             
-            <div class="w-full lg:w-72 flex-shrink-0">
-                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-8">
-                    <div class="p-5 bg-coffee-800 text-white font-bold uppercase tracking-wider text-sm">
-                        Módulos Operativos
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-panel rounded-2xl p-6 border border-white shadow-xl flex items-center justify-between hover:scale-[1.02] transition-transform">
+                    <div>
+                        <p class="text-sm font-bold text-gray-500 uppercase">Insumos en Riesgo</p>
+                        <p id="stat-alertas" class="text-4xl font-black text-accent-500">0</p>
                     </div>
-                    <ul class="flex flex-col">
-                        <li><button onclick="mostrarTab('tab-insumos')" class="w-full text-left px-6 py-5 hover:bg-coffee-50 border-b border-gray-100 text-coffee-900 font-bold transition flex items-center text-lg"><i class="fa-solid fa-boxes-stacked w-8 text-coffee-500"></i> Bodega</button></li>
-                        <li><button onclick="mostrarTab('tab-bebidas')" class="w-full text-left px-6 py-5 hover:bg-coffee-50 border-b border-gray-100 text-coffee-900 font-bold transition flex items-center text-lg"><i class="fa-solid fa-book-open w-8 text-coffee-500"></i> Catálogo</button></li>
-                        <li><button onclick="mostrarTab('tab-produccion')" class="w-full text-left px-6 py-5 hover:bg-coffee-50 border-b border-gray-100 text-coffee-900 font-bold transition flex items-center text-lg"><i class="fa-solid fa-blender w-8 text-coffee-500"></i> Producción</button></li>
-                        <li><button onclick="mostrarTab('tab-ventas')" class="w-full text-left px-6 py-5 hover:bg-coffee-50 text-coffee-900 font-bold transition flex items-center text-lg"><i class="fa-solid fa-cash-register w-8 text-coffee-500"></i> Ventas y Reportes</button></li>
-                    </ul>
+                    <div class="bg-red-100 p-4 rounded-full text-accent-500"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 border border-white shadow-xl flex items-center justify-between hover:scale-[1.02] transition-transform">
+                    <div>
+                        <p class="text-sm font-bold text-gray-500 uppercase">Bebidas en Catálogo</p>
+                        <p id="stat-bebidas" class="text-4xl font-black text-coffee-800">0</p>
+                    </div>
+                    <div class="bg-coffee-100 p-4 rounded-full text-coffee-800"><i class="fa-solid fa-mug-saucer text-2xl"></i></div>
+                </div>
+                <div class="bg-gradient-to-br from-coffee-800 to-coffee-900 rounded-2xl p-6 shadow-xl flex items-center justify-between hover:scale-[1.02] transition-transform text-white">
+                    <div>
+                        <p class="text-sm font-bold text-coffee-100 uppercase">Ingresos del Mes</p>
+                        <p class="text-4xl font-black">$<span id="stat-ingresos">0</span></p>
+                    </div>
+                    <div class="bg-white/20 p-4 rounded-full"><i class="fa-solid fa-sack-dollar text-2xl"></i></div>
                 </div>
             </div>
 
-            <div class="flex-grow bg-white rounded-2xl shadow-lg border border-gray-100 p-8 min-h-[600px]">
+            <div class="flex flex-col lg:flex-row gap-8">
                 
-                <div id="tab-insumos" class="tab-content hidden">
-                    <div class="flex justify-between items-center border-b-2 border-coffee-100 pb-4 mb-6">
-                        <h3 class="text-3xl font-black text-coffee-900"><i class="fa-solid fa-boxes-stacked mr-3 text-coffee-500"></i>Gestión de Bodega</h3>
-                    </div>
-                    
-                    <div class="bg-gray-50 p-6 rounded-xl mb-8 border border-gray-200 shadow-sm">
-                        <h4 class="font-bold text-lg mb-4 text-gray-700">Ingresar Materia Prima</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <input type="text" id="ins-id" placeholder="CÓDIGO (ej. INS-01)" class="px-4 py-3 border rounded-lg uppercase">
-                            <input type="text" id="ins-nombre" placeholder="Nombre del insumo" class="px-4 py-3 border rounded-lg">
-                            <input type="number" id="ins-cant" placeholder="Cantidad" class="px-4 py-3 border rounded-lg">
-                            <select id="ins-uni" class="px-4 py-3 border rounded-lg bg-white">
-                                <option value="Gramos">Gramos (g)</option>
-                                <option value="Mililitros">Mililitros (ml)</option>
-                            </select>
-                        </div>
-                        <button onclick="crearInsumo()" class="mt-4 bg-coffee-800 text-white px-6 py-3 rounded-lg hover:bg-coffee-900 transition font-bold shadow"><i class="fa-solid fa-plus mr-2"></i> Guardar en Bodega</button>
-                    </div>
-
-                    <div class="overflow-hidden rounded-xl shadow-sm border border-gray-200">
-                        <table class="min-w-full text-left">
-                            <thead class="bg-coffee-800 text-white">
-                                <tr>
-                                    <th class="px-6 py-4 font-semibold">Código</th>
-                                    <th class="px-6 py-4 font-semibold">Insumo</th>
-                                    <th class="px-6 py-4 font-semibold">Existencias</th>
-                                    <th class="px-6 py-4 text-right font-semibold">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-insumos" class="divide-y divide-gray-200"></tbody>
-                        </table>
+                <div class="w-full lg:w-80 flex-shrink-0">
+                    <div class="glass-panel rounded-3xl shadow-xl border border-white overflow-hidden sticky top-28">
+                        <ul class="flex flex-col p-3 gap-2">
+                            <li><button onclick="mostrarTab('tab-insumos')" class="w-full text-left px-6 py-5 rounded-2xl hover:bg-coffee-100 text-coffee-900 font-bold transition-all flex items-center text-lg focus:bg-coffee-800 focus:text-white group"><i class="fa-solid fa-boxes-stacked w-10 text-coffee-500 group-focus:text-coffee-100 text-xl"></i> Gestión de Bodega</button></li>
+                            <li><button onclick="mostrarTab('tab-bebidas')" class="w-full text-left px-6 py-5 rounded-2xl hover:bg-coffee-100 text-coffee-900 font-bold transition-all flex items-center text-lg focus:bg-coffee-800 focus:text-white group"><i class="fa-solid fa-book-open w-10 text-coffee-500 group-focus:text-coffee-100 text-xl"></i> Catálogo de Recetas</button></li>
+                            <li><button onclick="mostrarTab('tab-produccion')" class="w-full text-left px-6 py-5 rounded-2xl hover:bg-coffee-100 text-coffee-900 font-bold transition-all flex items-center text-lg focus:bg-coffee-800 focus:text-white group"><i class="fa-solid fa-blender w-10 text-coffee-500 group-focus:text-coffee-100 text-xl"></i> Módulo de Producción</button></li>
+                            <li><button onclick="mostrarTab('tab-ventas')" class="w-full text-left px-6 py-5 rounded-2xl hover:bg-coffee-100 text-coffee-900 font-bold transition-all flex items-center text-lg focus:bg-coffee-800 focus:text-white group"><i class="fa-solid fa-cash-register w-10 text-coffee-500 group-focus:text-coffee-100 text-xl"></i> Punto de Venta</button></li>
+                        </ul>
                     </div>
                 </div>
 
-                <div id="tab-bebidas" class="tab-content hidden">
-                    <h3 class="text-3xl font-black text-coffee-900 border-b-2 border-coffee-100 pb-4 mb-6"><i class="fa-solid fa-book-open mr-3 text-coffee-500"></i>Catálogo de Bebidas</h3>
+                <div class="flex-grow glass-panel rounded-3xl shadow-xl border border-white p-8 min-h-[700px]">
                     
-                    <div class="bg-gray-50 p-6 rounded-xl mb-8 border border-gray-200 shadow-sm flex flex-col lg:flex-row gap-8">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg mb-4 text-gray-700">1. Datos del Producto</h4>
-                            <div class="flex flex-col gap-4">
-                                <input type="text" id="beb-id" placeholder="CÓDIGO (ej. BEB-01)" class="px-4 py-3 border rounded-lg uppercase">
-                                <input type="text" id="beb-nombre" placeholder="Nombre de la bebida" class="px-4 py-3 border rounded-lg">
-                                <input type="number" id="beb-precio" placeholder="Precio de Venta ($)" class="px-4 py-3 border rounded-lg">
-                            </div>
+                    <div id="tab-insumos" class="tab-content hidden h-full flex flex-col">
+                        <div class="flex justify-between items-center pb-6 mb-8 border-b-2 border-gray-100">
+                            <h3 class="text-4xl font-black text-coffee-900"><i class="fa-solid fa-warehouse mr-4 text-coffee-500"></i>Inventario Físico</h3>
                         </div>
                         
-                        <div class="flex-1 border-l-0 lg:border-l-2 border-gray-200 lg:pl-8">
-                            <h4 class="font-bold text-lg mb-4 text-gray-700">2. Constructor de Receta</h4>
-                            <div class="flex gap-2 mb-4">
-                                <select id="sel-insumo" class="flex-grow px-3 py-2 border rounded-lg bg-white"></select>
-                                <input type="number" id="sel-cant" placeholder="Cant." class="w-24 px-3 py-2 border rounded-lg">
-                                <button onclick="agregarAlDiccionario()" class="bg-coffee-500 text-white px-4 py-2 rounded-lg hover:bg-coffee-800 transition"><i class="fa-solid fa-arrow-down"></i></button>
+                        <div class="bg-white p-8 rounded-2xl mb-8 shadow-md border border-gray-100 transition-all" id="form-insumos-container">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="font-black text-xl text-coffee-800" id="titulo-form-insumo">Registrar Nuevo Insumo</h4>
+                                <button onclick="cancelarEdicionInsumo()" id="btn-cancelar-insumo" class="hidden text-sm text-gray-500 hover:text-red-500 font-bold"><i class="fa-solid fa-times mr-1"></i>Cancelar Edición</button>
                             </div>
-                            <div class="bg-white border rounded-lg min-h-[100px] p-3 mb-4">
-                                <ul id="lista-receta-visual" class="space-y-2 text-sm"></ul>
-                                <p id="receta-vacia" class="text-gray-400 text-center mt-6 italic">Añade ingredientes a la receta</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <input type="hidden" id="ins-id-edit">
+                                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nombre Comercial</label><input type="text" id="ins-nombre" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-coffee-500 outline-none font-bold text-coffee-900"></div>
+                                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Cantidad Inicial</label><input type="number" id="ins-cant" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-coffee-500 outline-none font-bold text-coffee-900"></div>
+                                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Unidad de Medida</label><select id="ins-uni" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-coffee-500 outline-none font-bold text-coffee-900 bg-white"><option value="Gramos">Gramos (g)</option><option value="Mililitros">Mililitros (ml)</option></select></div>
                             </div>
-                            <button onclick="crearBebida()" class="w-full bg-coffee-800 text-white px-6 py-3 rounded-lg hover:bg-coffee-900 transition font-bold shadow">
-                                <i class="fa-solid fa-save mr-2"></i> Guardar Bebida en Catálogo
-                            </button>
+                            <button onclick="guardarInsumo()" id="btn-guardar-insumo" class="mt-6 bg-coffee-800 text-white px-8 py-4 rounded-xl hover:bg-coffee-900 transition-all font-black shadow-lg w-full md:w-auto"><i class="fa-solid fa-save mr-2"></i> Guardar en Bodega</button>
+                        </div>
+
+                        <div class="overflow-hidden rounded-2xl shadow-md border border-gray-100 bg-white flex-grow">
+                            <table class="min-w-full text-left">
+                                <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-5 font-black text-gray-600 uppercase text-xs tracking-wider">Código</th>
+                                        <th class="px-6 py-5 font-black text-gray-600 uppercase text-xs tracking-wider">Descripción</th>
+                                        <th class="px-6 py-5 font-black text-gray-600 uppercase text-xs tracking-wider">Stock Físico</th>
+                                        <th class="px-6 py-5 text-right font-black text-gray-600 uppercase text-xs tracking-wider">Mantenimiento</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-insumos" class="divide-y divide-gray-100"></tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="lista-bebidas-cards"></div>
-                </div>
-
-                <div id="tab-produccion" class="tab-content hidden">
-                    <h3 class="text-3xl font-black text-coffee-900 border-b-2 border-coffee-100 pb-4 mb-6"><i class="fa-solid fa-blender mr-3 text-coffee-500"></i>Módulo de Producción</h3>
-                    
-                    <div class="bg-white p-8 rounded-2xl border-2 border-blue-100 shadow-lg max-w-2xl mx-auto mt-10">
-                        <div class="text-center mb-6">
-                            <i class="fa-solid fa-gear text-4xl text-blue-500 mb-3 animate-spin-slow"></i>
-                            <h4 class="text-xl font-bold text-gray-800">Preparar Lote de Bebidas</h4>
-                        </div>
-                        <label class="block font-bold text-gray-700 mb-2">Producto a Preparar:</label>
-                        <select id="prod-bebida" class="w-full px-4 py-3 border rounded-lg mb-5 bg-gray-50 text-lg"></select>
-                        
-                        <label class="block font-bold text-gray-700 mb-2">Unidades a Producir:</label>
-                        <input type="number" id="prod-cant" value="1" min="1" class="w-full px-4 py-3 border rounded-lg mb-8 bg-gray-50 text-xl font-bold text-center">
-                        
-                        <button onclick="ejecutarProduccion()" class="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 font-black text-lg shadow-xl hover:-translate-y-1 transition transform">
-                            <i class="fa-solid fa-play mr-2"></i> INICIAR PROCESO
-                        </button>
-                    </div>
-                </div>
-
-                <div id="tab-ventas" class="tab-content hidden">
-                    <h3 class="text-3xl font-black text-coffee-900 border-b-2 border-coffee-100 pb-4 mb-6"><i class="fa-solid fa-cash-register mr-3 text-coffee-500"></i>Punto de Venta</h3>
-                    
-                    <div class="flex flex-col xl:flex-row gap-8">
-                        <div class="flex-1 bg-white p-8 rounded-2xl border-2 border-green-100 shadow-lg h-fit">
-                            <h4 class="text-xl font-bold text-gray-800 mb-6 text-center">Registrar Nueva Venta</h4>
-                            <select id="ven-bebida" class="w-full px-4 py-3 border rounded-lg mb-5 bg-gray-50 text-lg"></select>
-                            <input type="number" id="ven-cant" value="1" min="1" class="w-full px-4 py-3 border rounded-lg mb-8 bg-gray-50 text-xl font-bold text-center">
-                            <button onclick="ejecutarVenta()" class="w-full bg-green-600 text-white py-4 rounded-xl hover:bg-green-700 font-black text-lg shadow-xl hover:-translate-y-1 transition transform">
-                                <i class="fa-solid fa-check-double mr-2"></i> CONFIRMAR VENTA
-                            </button>
+                    <div id="tab-bebidas" class="tab-content hidden">
+                        <div class="flex justify-between items-center pb-6 mb-8 border-b-2 border-gray-100">
+                            <h3 class="text-4xl font-black text-coffee-900"><i class="fa-solid fa-book-bookmark mr-4 text-coffee-500"></i>Gestión de Catálogo</h3>
                         </div>
                         
-                        <div class="flex-[2]">
-                            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                        <div class="bg-white p-8 rounded-2xl mb-10 shadow-md border border-gray-100 flex flex-col xl:flex-row gap-10" id="form-bebidas-container">
+                            <div class="flex-1">
                                 <div class="flex justify-between items-center mb-6">
-                                    <h4 class="font-bold text-xl text-gray-800">Historial de Ventas</h4>
-                                    <div class="bg-green-100 text-green-800 px-4 py-2 rounded-lg font-black text-lg shadow-inner">
-                                        Total: $<span id="total-recaudado">0</span>
+                                    <h4 class="font-black text-xl text-coffee-800" id="titulo-form-bebida">Definir Producto</h4>
+                                    <button onclick="cancelarEdicionBebida()" id="btn-cancelar-bebida" class="hidden text-sm text-gray-500 hover:text-red-500 font-bold"><i class="fa-solid fa-times mr-1"></i>Cancelar</button>
+                                </div>
+                                <input type="hidden" id="beb-id-edit">
+                                <div class="space-y-6">
+                                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nombre Comercial</label><input type="text" id="beb-nombre" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-coffee-500 outline-none font-bold text-coffee-900 text-lg"></div>
+                                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Precio de Venta Sugerido ($)</label><input type="number" id="beb-precio" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-coffee-500 outline-none font-bold text-green-700 text-2xl"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex-[1.5] border-t-2 xl:border-t-0 xl:border-l-2 border-gray-100 pt-8 xl:pt-0 xl:pl-10">
+                                <h4 class="font-black text-xl text-coffee-800 mb-6">Fórmula de Preparación</h4>
+                                <div class="flex gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                    <select id="sel-insumo" class="flex-grow px-4 py-3 border-2 border-gray-200 rounded-xl bg-white font-medium outline-none focus:border-coffee-500"></select>
+                                    <input type="number" id="sel-cant" placeholder="Cant." class="w-28 px-4 py-3 border-2 border-gray-200 rounded-xl font-bold text-center outline-none focus:border-coffee-500">
+                                    <button onclick="agregarAlDiccionario()" class="bg-coffee-500 text-white px-6 py-3 rounded-xl hover:bg-coffee-600 transition font-bold shadow-md"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="bg-white border-2 border-dashed border-gray-300 rounded-xl min-h-[120px] p-4 mb-6">
+                                    <ul id="lista-receta-visual" class="space-y-3"></ul>
+                                    <div id="receta-vacia" class="text-center mt-6">
+                                        <i class="fa-solid fa-flask text-3xl text-gray-300 mb-2"></i>
+                                        <p class="text-gray-400 font-medium">La fórmula está vacía</p>
                                     </div>
                                 </div>
-                                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-                                    <table class="min-w-full text-left text-sm">
-                                        <thead class="bg-gray-100 text-gray-600">
-                                            <tr>
-                                                <th class="px-4 py-3">Fecha y Hora</th>
-                                                <th class="px-4 py-3">Producto</th>
-                                                <th class="px-4 py-3 text-center">Cant.</th>
-                                                <th class="px-4 py-3 text-right">Recaudo</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabla-ventas" class="divide-y divide-gray-100"></tbody>
-                                    </table>
+                                <button onclick="guardarBebida()" id="btn-guardar-bebida" class="w-full bg-coffee-800 text-white px-6 py-4 rounded-xl hover:bg-coffee-900 transition-all font-black text-lg shadow-xl hover:-translate-y-1">
+                                    Guardar en Catálogo
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-8" id="lista-bebidas-cards"></div>
+                    </div>
+
+                    <div id="tab-produccion" class="tab-content hidden">
+                        <div class="flex justify-between items-center pb-6 mb-8 border-b-2 border-gray-100">
+                            <h3 class="text-4xl font-black text-coffee-900"><i class="fa-solid fa-industry mr-4 text-coffee-500"></i>Línea de Producción</h3>
+                        </div>
+                        
+                        <div class="bg-white p-10 rounded-3xl border border-gray-100 shadow-2xl max-w-3xl mx-auto mt-12 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-10"></div>
+                            <div class="text-center mb-10">
+                                <div class="inline-block bg-blue-100 p-6 rounded-full mb-6">
+                                    <i class="fa-solid fa-gears text-5xl text-blue-600"></i>
+                                </div>
+                                <h4 class="text-2xl font-black text-gray-800">Generar Lote de Producto</h4>
+                                <p class="text-gray-500 font-medium mt-2">El sistema validará el stock de la bodega automáticamente.</p>
+                            </div>
+                            <div class="space-y-6">
+                                <div><label class="block font-black text-gray-700 mb-3 uppercase text-sm">Seleccionar Referencia</label><select id="prod-bebida" class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl bg-gray-50 text-xl font-medium outline-none focus:border-blue-500 focus:bg-white transition"></select></div>
+                                <div><label class="block font-black text-gray-700 mb-3 uppercase text-sm">Volumen de Producción (Unidades)</label><input type="number" id="prod-cant" value="1" min="1" class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl bg-gray-50 text-3xl font-black text-center outline-none focus:border-blue-500 focus:bg-white transition"></div>
+                            </div>
+                            <button onclick="ejecutarProduccion()" class="w-full mt-10 bg-blue-600 text-white py-5 rounded-2xl hover:bg-blue-700 font-black text-xl shadow-xl shadow-blue-600/30 hover:-translate-y-1 transition transform flex justify-center items-center gap-3">
+                                <i class="fa-solid fa-play"></i> INICIAR PROCESO INDUSTRIAL
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tab-ventas" class="tab-content hidden">
+                        <div class="flex justify-between items-center pb-6 mb-8 border-b-2 border-gray-100">
+                            <h3 class="text-4xl font-black text-coffee-900"><i class="fa-solid fa-store mr-4 text-coffee-500"></i>Terminal POS</h3>
+                        </div>
+                        
+                        <div class="flex flex-col xl:flex-row gap-8">
+                            <div class="flex-1 bg-white p-8 rounded-3xl border border-gray-100 shadow-2xl h-fit">
+                                <div class="text-center mb-8">
+                                    <div class="inline-block bg-green-100 p-4 rounded-full mb-4">
+                                        <i class="fa-solid fa-basket-shopping text-3xl text-green-600"></i>
+                                    </div>
+                                    <h4 class="text-xl font-black text-gray-800">Caja Registradora</h4>
+                                </div>
+                                <select id="ven-bebida" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl mb-6 bg-gray-50 text-lg outline-none focus:border-green-500 font-medium"></select>
+                                <input type="number" id="ven-cant" value="1" min="1" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl mb-8 bg-gray-50 text-3xl font-black text-center outline-none focus:border-green-500">
+                                <button onclick="ejecutarVenta()" class="w-full bg-green-600 text-white py-5 rounded-2xl hover:bg-green-700 font-black text-xl shadow-xl shadow-green-600/30 hover:-translate-y-1 transition transform flex justify-center items-center gap-3">
+                                    <i class="fa-solid fa-check-double"></i> FACTURAR
+                                </button>
+                            </div>
+                            
+                            <div class="flex-[2.5]">
+                                <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-lg">
+                                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b-2 border-gray-100 pb-6">
+                                        <div>
+                                            <h4 class="font-black text-2xl text-coffee-900">Historial Financiero</h4>
+                                            <p class="text-gray-500 font-bold" id="mes-filtro-display">Filtro: Mes Actual</p>
+                                        </div>
+                                        <div class="bg-coffee-900 text-white px-8 py-4 rounded-2xl font-black text-2xl shadow-inner flex items-center gap-4">
+                                            <i class="fa-solid fa-chart-line text-coffee-500"></i>
+                                            $<span id="total-recaudado">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="overflow-hidden rounded-xl border border-gray-200">
+                                        <table class="min-w-full text-left">
+                                            <thead class="bg-gray-50 border-b-2 border-gray-200">
+                                                <tr>
+                                                    <th class="px-6 py-4 font-black text-gray-500 uppercase text-xs">Fecha y Hora</th>
+                                                    <th class="px-6 py-4 font-black text-gray-500 uppercase text-xs">Concepto</th>
+                                                    <th class="px-6 py-4 text-center font-black text-gray-500 uppercase text-xs">Cant.</th>
+                                                    <th class="px-6 py-4 text-right font-black text-gray-500 uppercase text-xs">Ingreso</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabla-ventas" class="divide-y divide-gray-100"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
@@ -226,54 +288,47 @@
         const API_URL = "/api/";
         let diccionarioRecetaVisual = {}; 
         let listadoInsumosNombres = {};
+        
+        let insumoEditandoId = null;
+        let bebidaEditandoId = null;
 
-        // --- SISTEMA DE TOASTS (NOTIFICACIONES PROFESIONALES) ---
+        const mesesStr = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
         function mostrarAlerta(mensaje, tipo = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const bgClass = tipo === 'success' ? 'bg-green-600' : 'bg-red-600';
-            const icon = tipo === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
-            
-            toast.className = `${bgClass} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 toast-enter max-w-sm`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-xl"></i><p class="font-medium text-sm">${mensaje}</p>`;
-            
+            const isSuccess = tipo === 'success';
+            toast.className = `${isSuccess ? 'bg-coffee-800' : 'bg-red-600'} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 toast-enter border ${isSuccess ? 'border-coffee-500' : 'border-red-400'}`;
+            toast.innerHTML = `<div class="${isSuccess ? 'bg-coffee-500' : 'bg-red-500'} p-2 rounded-full"><i class="fa-solid ${isSuccess ? 'fa-check' : 'fa-exclamation'} text-white"></i></div><p class="font-bold tracking-wide">${mensaje}</p>`;
             container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.replace('toast-enter', 'toast-leave');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
-        // Parseador amigable de errores de Django
         function parsearErrorDjango(data) {
             if (typeof data === 'string') return data;
             if (data.error) return Array.isArray(data.error) ? data.error[0] : data.error;
             if (data.detail) return data.detail;
-            
             let mensajes = [];
-            for (let campo in data) {
-                if (Array.isArray(data[campo])) {
-                    mensajes.push(`${data[campo][0]}`);
-                }
-            }
-            return mensajes.length > 0 ? mensajes.join(' ') : "Error de validación en el formulario.";
+            for (let c in data) { if (Array.isArray(data[c])) mensajes.push(`${data[c][0]}`); }
+            return mensajes.length > 0 ? mensajes.join(' ') : "Transacción rechazada por el servidor.";
         }
 
-        // --- FETCH MAESTRO ---
         async function fetchAPI(endpoint, method = 'GET', body = null) {
             const token = localStorage.getItem("access_token");
             const headers = { "Content-Type": "application/json", "Authorization": token ? `Bearer ${token}` : "" };
             const options = { method, headers };
             if (body) options.body = JSON.stringify(body);
-
             try {
                 const res = await fetch(API_URL + endpoint, options);
-                if (res.status === 401) { cerrarSesion(); mostrarAlerta("Sesión expirada.", "error"); throw new Error("401"); }
+                if (res.status === 401) { cerrarSesion(); mostrarAlerta("Sesión de seguridad caducada.", "error"); throw new Error("401"); }
                 const data = await res.json().catch(() => ({}));
                 return { ok: res.ok, status: res.status, data };
-            } catch (e) {
-                return { ok: false, data: { error: "No se pudo conectar con el servidor." } };
-            }
+            } catch (e) { return { ok: false, data: { error: "Falla de comunicación interna." } }; }
+        }
+
+        function actualizarDashboardGlobal() {
+            document.getElementById('stat-alertas').innerText = Object.values(listadoInsumosNombres).filter(i => i.cant <= 50).length;
+            fetchAPI("bebidas/").then(res => { if(res.ok) document.getElementById('stat-bebidas').innerText = res.data.length; });
         }
 
         function mostrarTab(tabId) {
@@ -283,21 +338,21 @@
             if(tabId === 'tab-bebidas') { cargarBebidas(); cargarSelectInsumosVisual(); }
             if(tabId === 'tab-produccion') cargarSelectsBebidas();
             if(tabId === 'tab-ventas') { cargarSelectsBebidas(); cargarHistorialVentas(); }
+            actualizarDashboardGlobal();
         }
 
-        // --- AUTENTICACIÓN ---
         async function iniciarSesion() {
             const u = document.getElementById('username').value, p = document.getElementById('password').value;
             const res = await fetchAPI("token/", "POST", { username: u, password: p });
             if (res.ok) {
                 localStorage.setItem("access_token", res.data.access);
-                document.getElementById('user-display').innerText = `Hola, ${u}`;
+                document.getElementById('user-display').innerText = u;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('dashboard-section').classList.remove('hidden');
                 document.getElementById('nav-logout').classList.remove('hidden');
-                mostrarAlerta(`Bienvenido al turno, ${u}`, 'success');
+                mostrarAlerta(`Sistema desbloqueado.`, 'success');
                 mostrarTab('tab-insumos');
-            } else { mostrarAlerta("Credenciales incorrectas.", 'error'); }
+            } else { mostrarAlerta("Credenciales erróneas.", 'error'); }
         }
 
         function cerrarSesion() {
@@ -305,10 +360,17 @@
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('dashboard-section').classList.add('hidden');
             document.getElementById('nav-logout').classList.add('hidden');
-            mostrarAlerta("Turno finalizado correctamente.", 'success');
+            document.getElementById('username').value = ""; document.getElementById('password').value = "";
         }
 
-        // --- CRUD INSUMOS ---
+        async function registrar() {
+            const u = document.getElementById('username').value, p = document.getElementById('password').value;
+            if(!u || !p) return mostrarAlerta("Datos incompletos.", "error");
+            const res = await fetch("/api/registro/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: u, password: p }) });
+            if(res.ok) { mostrarAlerta("Credencial creada. Autorizado para ingresar.", 'success'); }
+            else { mostrarAlerta("El usuario ya se encuentra registrado.", 'error'); }
+        }
+
         async function cargarInsumos() {
             const res = await fetchAPI("insumos/");
             const tbody = document.getElementById('tabla-insumos');
@@ -316,127 +378,183 @@
             listadoInsumosNombres = {};
             
             res.data.forEach(ins => {
-                listadoInsumosNombres[ins.id_producto] = `${ins.nombre} (${ins.unidad_medida})`;
-                const warningClass = ins.cantidad <= 50 ? 'text-red-600 font-bold' : 'text-coffee-800 font-bold';
+                listadoInsumosNombres[ins.id_producto] = { nombre: ins.nombre, uni: ins.unidad_medida, cant: ins.cantidad };
+                const isLow = ins.cantidad <= 50;
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 font-mono text-xs text-gray-500">${ins.id_producto}</td>
-                        <td class="px-6 py-4 font-bold text-gray-800">${ins.nombre}</td>
-                        <td class="px-6 py-4 ${warningClass}">${ins.cantidad} <span class="text-xs font-normal text-gray-500">${ins.unidad_medida}</span></td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="eliminarEntidad('insumos', '${ins.id_producto}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-5 font-mono text-xs font-bold text-gray-400">${ins.id_producto}</td>
+                        <td class="px-6 py-5 font-black text-gray-800 text-lg">${ins.nombre}</td>
+                        <td class="px-6 py-5">
+                            <span class="${isLow ? 'bg-red-100 text-red-700' : 'bg-coffee-100 text-coffee-800'} px-3 py-1 rounded-lg font-black border ${isLow ? 'border-red-200' : 'border-coffee-200'}">
+                                ${ins.cantidad} <span class="text-xs font-bold uppercase ml-1">${ins.unidad_medida}</span>
+                            </span>
+                        </td>
+                        <td class="px-6 py-5 text-right space-x-2">
+                            <button onclick="prepararEdicionInsumo('${ins.id_producto}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 w-10 h-10 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="eliminarEntidad('insumos', '${ins.id_producto}')" class="text-red-500 hover:text-red-700 bg-red-50 w-10 h-10 rounded-xl transition"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
+            actualizarDashboardGlobal();
         }
 
-        async function crearInsumo() {
-            const body = {
-                id_producto: document.getElementById('ins-id').value.toUpperCase(),
-                nombre: document.getElementById('ins-nombre').value,
-                cantidad: parseFloat(document.getElementById('ins-cant').value),
-                unidad_medida: document.getElementById('ins-uni').value
-            };
-            const res = await fetchAPI("insumos/", "POST", body);
+        function prepararEdicionInsumo(id) {
+            const ins = listadoInsumosNombres[id];
+            insumoEditandoId = id;
+            document.getElementById('titulo-form-insumo').innerText = `Actualizando: ${id}`;
+            document.getElementById('ins-nombre').value = ins.nombre;
+            document.getElementById('ins-cant').value = ins.cant;
+            document.getElementById('ins-uni').value = ins.uni;
+            document.getElementById('btn-guardar-insumo').innerHTML = '<i class="fa-solid fa-rotate mr-2"></i> Actualizar Ficha';
+            document.getElementById('btn-guardar-insumo').classList.replace('bg-coffee-800', 'bg-blue-600');
+            document.getElementById('btn-guardar-insumo').classList.replace('hover:bg-coffee-900', 'hover:bg-blue-700');
+            document.getElementById('btn-cancelar-insumo').classList.remove('hidden');
+            document.getElementById('form-insumos-container').classList.add('ring-4', 'ring-blue-100');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicionInsumo() {
+            insumoEditandoId = null;
+            document.getElementById('titulo-form-insumo').innerText = "Registrar Nuevo Insumo";
+            document.getElementById('ins-nombre').value = ''; document.getElementById('ins-cant').value = '';
+            document.getElementById('btn-guardar-insumo').innerHTML = '<i class="fa-solid fa-save mr-2"></i> Guardar en Bodega';
+            document.getElementById('btn-guardar-insumo').classList.replace('bg-blue-600', 'bg-coffee-800');
+            document.getElementById('btn-guardar-insumo').classList.replace('hover:bg-blue-700', 'hover:bg-coffee-900');
+            document.getElementById('btn-cancelar-insumo').classList.add('hidden');
+            document.getElementById('form-insumos-container').classList.remove('ring-4', 'ring-blue-100');
+        }
+
+        async function guardarInsumo() {
+            const body = { nombre: document.getElementById('ins-nombre').value, cantidad: parseFloat(document.getElementById('ins-cant').value), unidad_medida: document.getElementById('ins-uni').value };
+            const method = insumoEditandoId ? "PUT" : "POST";
+            const endpoint = insumoEditandoId ? `insumos/${insumoEditandoId}/` : "insumos/";
+            
+            const res = await fetchAPI(endpoint, method, body);
             if(res.ok) { 
-                mostrarAlerta("Materia prima guardada en bodega.", 'success'); 
-                cargarInsumos();
-                document.getElementById('ins-id').value = ''; document.getElementById('ins-nombre').value = ''; document.getElementById('ins-cant').value = '';
-            }
-            else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
+                mostrarAlerta(insumoEditandoId ? "Ficha actualizada." : "Materia prima registrada.", 'success'); 
+                cancelarEdicionInsumo(); cargarInsumos();
+            } else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
         }
 
-        // --- CONSTRUCTOR VISUAL DE RECETAS ---
         async function cargarSelectInsumosVisual() {
             const res = await fetchAPI("insumos/");
             const sel = document.getElementById('sel-insumo');
-            sel.innerHTML = '<option value="">-- Selecciona Ingrediente --</option>';
+            sel.innerHTML = '<option value="">-- Buscar Ingrediente --</option>';
             res.data.forEach(ins => { sel.innerHTML += `<option value="${ins.id_producto}">${ins.nombre} (${ins.unidad_medida})</option>`; });
         }
 
         function agregarAlDiccionario() {
             const id = document.getElementById('sel-insumo').value;
             const cant = parseFloat(document.getElementById('sel-cant').value);
-            if(!id || !cant) return mostrarAlerta("Selecciona un ingrediente y su cantidad.", "error");
-            
+            if(!id || !cant) return mostrarAlerta("Define el ingrediente y la dosis.", "error");
             diccionarioRecetaVisual[id] = cant;
             actualizarListaRecetaVisual();
             document.getElementById('sel-cant').value = '';
         }
 
-        function quitarDelDiccionario(id) {
-            delete diccionarioRecetaVisual[id];
-            actualizarListaRecetaVisual();
-        }
+        function quitarDelDiccionario(id) { delete diccionarioRecetaVisual[id]; actualizarListaRecetaVisual(); }
 
         function actualizarListaRecetaVisual() {
             const ul = document.getElementById('lista-receta-visual');
             const placeholder = document.getElementById('receta-vacia');
             ul.innerHTML = "";
-            
             const keys = Object.keys(diccionarioRecetaVisual);
             if(keys.length === 0) { placeholder.classList.remove('hidden'); } 
             else {
                 placeholder.classList.add('hidden');
                 keys.forEach(id => {
-                    const nombreStr = listadoInsumosNombres[id] || id;
+                    const obj = listadoInsumosNombres[id];
+                    const nombreStr = obj ? obj.nombre : id;
+                    const uni = obj ? obj.uni : '';
                     ul.innerHTML += `
-                        <li class="flex justify-between items-center bg-coffee-50 p-2 rounded border border-coffee-100">
-                            <span class="font-medium text-coffee-900">${nombreStr}</span>
-                            <div class="flex items-center gap-3">
-                                <span class="font-bold text-coffee-800">${diccionarioRecetaVisual[id]}</span>
-                                <button onclick="quitarDelDiccionario('${id}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-times"></i></button>
+                        <li class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-sm">
+                            <span class="font-bold text-gray-800">${nombreStr}</span>
+                            <div class="flex items-center gap-4">
+                                <span class="bg-white px-3 py-1 rounded border border-gray-200 font-black text-coffee-800">${diccionarioRecetaVisual[id]} <span class="text-xs font-medium text-gray-400">${uni}</span></span>
+                                <button onclick="quitarDelDiccionario('${id}')" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-circle-minus text-xl"></i></button>
                             </div>
                         </li>`;
                 });
             }
         }
 
-        // --- CRUD BEBIDAS ---
         async function cargarBebidas() {
             const res = await fetchAPI("bebidas/");
             const div = document.getElementById('lista-bebidas-cards');
             div.innerHTML = "";
             res.data.forEach(b => {
-                let itemsReceta = Object.entries(b.receta).map(([id, cant]) => `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded inline-block m-1">${id}: ${cant}</span>`).join('');
-                
+                let itemsReceta = Object.entries(b.receta).map(([id, cant]) => {
+                    const n = listadoInsumosNombres[id] ? listadoInsumosNombres[id].nombre : id;
+                    return `<div class="flex justify-between text-sm py-1 border-b border-gray-100 last:border-0"><span class="text-gray-600 font-medium">${n}</span><span class="font-bold text-coffee-900">${cant}</span></div>`;
+                }).join('');
                 div.innerHTML += `
-                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm relative hover:shadow-md transition">
-                        <button onclick="eliminarEntidad('bebidas', '${b.id_producto}')" class="absolute top-4 right-4 text-red-500 hover:text-red-700 bg-red-50 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-trash"></i></button>
-                        <h4 class="font-black text-xl text-coffee-900">${b.nombre}</h4>
-                        <p class="text-xs text-gray-400 font-mono mb-4">${b.id_producto}</p>
-                        <div class="flex justify-between items-center mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <div class="text-center"><span class="block text-xs text-gray-500 uppercase">Vitrina</span><span class="font-black text-xl text-coffee-800">${b.cantidad}</span></div>
-                            <div class="text-center"><span class="block text-xs text-gray-500 uppercase">Precio</span><span class="font-black text-xl text-green-600">$${b.precio_venta}</span></div>
+                    <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-xl relative hover:shadow-2xl transition flex flex-col h-full">
+                        <div class="absolute top-4 right-4 flex gap-2">
+                            <button onclick="prepararEdicionBebida('${b.id_producto}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 w-10 h-10 rounded-xl transition"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="eliminarEntidad('bebidas', '${b.id_producto}')" class="text-red-500 hover:text-red-700 bg-red-50 w-10 h-10 rounded-xl transition"><i class="fa-solid fa-trash"></i></button>
                         </div>
-                        <div class="border-t border-gray-100 pt-3"><p class="text-xs font-bold text-gray-500 mb-1">Ingredientes:</p>${itemsReceta}</div>
+                        <h4 class="font-black text-2xl text-coffee-900 pr-24 leading-tight">${b.nombre}</h4>
+                        <p class="text-xs text-gray-400 font-bold font-mono mb-6">${b.id_producto}</p>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center"><span class="block text-xs text-gray-400 uppercase font-bold mb-1">Stock Vitrina</span><span class="font-black text-2xl text-coffee-800">${b.cantidad}</span></div>
+                            <div class="bg-green-50 p-3 rounded-xl border border-green-100 text-center"><span class="block text-xs text-green-600/70 uppercase font-bold mb-1">Precio</span><span class="font-black text-2xl text-green-700">$${b.precio_venta}</span></div>
+                        </div>
+                        <div class="mt-auto bg-gray-50 p-4 rounded-xl border border-gray-200"><p class="text-xs font-black text-gray-500 uppercase tracking-wider mb-2">Composición</p>${itemsReceta || '<p class="text-sm text-red-500 font-bold">Fórmula no definida</p>'}</div>
                     </div>`;
             });
+            actualizarDashboardGlobal();
         }
 
-        async function crearBebida() {
-            if(Object.keys(diccionarioRecetaVisual).length === 0) return mostrarAlerta("La bebida debe tener al menos un ingrediente.", "error");
+        async function prepararEdicionBebida(id) {
+            const res = await fetchAPI(`bebidas/${id}/`);
+            if(!res.ok) return mostrarAlerta("No se pudo cargar la bebida.", "error");
+            const b = res.data;
+            bebidaEditandoId = id;
+            document.getElementById('titulo-form-bebida').innerText = `Reconfigurando: ${id}`;
+            document.getElementById('beb-nombre').value = b.nombre;
+            document.getElementById('beb-precio').value = b.precio_venta;
+            diccionarioRecetaVisual = b.receta || {};
+            actualizarListaRecetaVisual();
+            document.getElementById('btn-guardar-bebida').innerHTML = '<i class="fa-solid fa-rotate mr-2"></i> Actualizar Producto';
+            document.getElementById('btn-guardar-bebida').classList.replace('bg-coffee-800', 'bg-blue-600');
+            document.getElementById('btn-guardar-bebida').classList.replace('hover:bg-coffee-900', 'hover:bg-blue-700');
+            document.getElementById('btn-cancelar-bebida').classList.remove('hidden');
+            document.getElementById('form-bebidas-container').classList.add('ring-4', 'ring-blue-100');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicionBebida() {
+            bebidaEditandoId = null;
+            document.getElementById('titulo-form-bebida').innerText = "Definir Producto";
+            document.getElementById('beb-nombre').value = ''; document.getElementById('beb-precio').value = '';
+            diccionarioRecetaVisual = {}; actualizarListaRecetaVisual();
+            document.getElementById('btn-guardar-bebida').innerHTML = '<i class="fa-solid fa-save mr-2"></i> Guardar en Catálogo';
+            document.getElementById('btn-guardar-bebida').classList.replace('bg-blue-600', 'bg-coffee-800');
+            document.getElementById('btn-guardar-bebida').classList.replace('hover:bg-blue-700', 'hover:bg-coffee-900');
+            document.getElementById('btn-cancelar-bebida').classList.add('hidden');
+            document.getElementById('form-bebidas-container').classList.remove('ring-4', 'ring-blue-100');
+        }
+
+        async function guardarBebida() {
+            if(Object.keys(diccionarioRecetaVisual).length === 0) return mostrarAlerta("La fórmula exige al menos un insumo.", "error");
+            const body = { nombre: document.getElementById('beb-nombre').value, precio_venta: document.getElementById('beb-precio').value, receta: diccionarioRecetaVisual };
+            const method = bebidaEditandoId ? "PUT" : "POST";
+            const endpoint = bebidaEditandoId ? `bebidas/${bebidaEditandoId}/` : "bebidas/";
             
-            const body = {
-                id_producto: document.getElementById('beb-id').value.toUpperCase(),
-                nombre: document.getElementById('beb-nombre').value,
-                precio_venta: document.getElementById('beb-precio').value,
-                cantidad: 0,
-                receta: diccionarioRecetaVisual
-            };
-            const res = await fetchAPI("bebidas/", "POST", body);
+            if(bebidaEditandoId) { const old = await fetchAPI(`bebidas/${bebidaEditandoId}/`); body.cantidad = old.data.cantidad; }
+            else { body.cantidad = 0; }
+
+            const res = await fetchAPI(endpoint, method, body);
             if(res.ok) { 
-                mostrarAlerta("Catálogo actualizado.", 'success'); 
-                diccionarioRecetaVisual = {}; actualizarListaRecetaVisual(); cargarBebidas();
-                document.getElementById('beb-id').value = ''; document.getElementById('beb-nombre').value = ''; document.getElementById('beb-precio').value = '';
+                mostrarAlerta(bebidaEditandoId ? "Catálogo actualizado." : "Referencia codificada.", 'success'); 
+                cancelarEdicionBebida(); cargarBebidas();
             } else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
         }
 
-        // --- PRODUCCIÓN Y VENTAS ---
         async function cargarSelectsBebidas() {
             const res = await fetchAPI("bebidas/");
             let options = "";
-            res.data.forEach(b => options += `<option value="${b.id_producto}">${b.nombre} (Disponibles: ${b.cantidad})</option>`);
+            res.data.forEach(b => options += `<option value="${b.id_producto}">${b.nombre} — Stock: ${b.cantidad}</option>`);
             document.getElementById('prod-bebida').innerHTML = options;
             document.getElementById('ven-bebida').innerHTML = options;
         }
@@ -444,19 +562,15 @@
         async function ejecutarProduccion() {
             const body = { bebida: document.getElementById('prod-bebida').value, cantidad_preparada: parseInt(document.getElementById('prod-cant').value) };
             const res = await fetchAPI("produccion/", "POST", body);
-            if(res.ok) { 
-                mostrarAlerta("¡Producción completada! Insumos descontados de bodega.", 'success');
-                cargarSelectsBebidas(); document.getElementById('prod-cant').value = 1;
-            } else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
+            if(res.ok) { mostrarAlerta("Operación exitosa. Bodega actualizada.", 'success'); cargarSelectsBebidas(); document.getElementById('prod-cant').value = 1; actualizarDashboardGlobal(); } 
+            else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
         }
 
         async function ejecutarVenta() {
             const body = { bebida: document.getElementById('ven-bebida').value, cantidad_vendida: parseInt(document.getElementById('ven-cant').value) };
             const res = await fetchAPI("ventas/", "POST", body);
-            if(res.ok) { 
-                mostrarAlerta("¡Venta registrada con éxito!", 'success');
-                cargarSelectsBebidas(); cargarHistorialVentas(); document.getElementById('ven-cant').value = 1;
-            } else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
+            if(res.ok) { mostrarAlerta("Venta liquidada.", 'success'); cargarSelectsBebidas(); cargarHistorialVentas(); document.getElementById('ven-cant').value = 1; actualizarDashboardGlobal(); } 
+            else { mostrarAlerta(parsearErrorDjango(res.data), 'error'); }
         }
 
         async function cargarHistorialVentas() {
@@ -465,30 +579,43 @@
             tbody.innerHTML = "";
             let recaudoTotal = 0;
             
+            const fechaActual = new Date();
+            const mesActual = fechaActual.getMonth();
+            const añoActual = fechaActual.getFullYear();
+            
+            document.getElementById('mes-filtro-display').innerText = `Filtro: ${mesesStr[mesActual]} ${añoActual}`;
+
             res.data.reverse().forEach(v => {
-                const fecha = new Date(v.fecha_venta).toLocaleDateString('es-ES', { month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                const precioUnidad = v.precio_unitario || 0;
-                const totalVenta = precioUnidad * v.cantidad_vendida;
-                recaudoTotal += totalVenta;
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="px-4 py-3 text-xs text-gray-500 capitalize">${fecha}</td>
-                        <td class="px-4 py-3 font-bold text-coffee-800">${v.nombre_bebida || 'Producto Eliminado'}</td>
-                        <td class="px-4 py-3 text-center font-bold">${v.cantidad_vendida}</td>
-                        <td class="px-4 py-3 text-right text-green-700 font-bold">$${totalVenta}</td>
-                    </tr>`;
+                const fecha = new Date(v.fecha_venta);
+                if (fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual) {
+                    const d = fecha.getDate().toString().padStart(2, '0');
+                    const m = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                    const h = fecha.getHours().toString().padStart(2, '0');
+                    const min = fecha.getMinutes().toString().padStart(2, '0');
+                    const fechaFormat = `${d}/${m} - ${h}:${min}`;
+                    
+                    const totalVenta = (v.precio_unitario || 0) * v.cantidad_vendida;
+                    recaudoTotal += totalVenta;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-gray-500 tracking-wider">${fechaFormat}</td>
+                            <td class="px-6 py-4 font-black text-coffee-800 text-lg">${v.nombre_bebida || 'Ref. Retirada'}</td>
+                            <td class="px-6 py-4 text-center font-black text-xl text-gray-700">${v.cantidad_vendida}</td>
+                            <td class="px-6 py-4 text-right text-green-700 font-black text-xl">$${totalVenta.toLocaleString('es-CO')}</td>
+                        </tr>`;
+                }
             });
             document.getElementById('total-recaudado').innerText = recaudoTotal.toLocaleString('es-CO');
+            document.getElementById('stat-ingresos').innerText = recaudoTotal.toLocaleString('es-CO');
         }
 
         async function eliminarEntidad(ruta, id) {
             const res = await fetchAPI(`${ruta}/${id}/`, "DELETE");
             if(res.ok) {
-                mostrarAlerta("Registro eliminado.", 'success');
+                mostrarAlerta("Información eliminada del servidor.", 'success');
                 if(ruta === 'insumos') cargarInsumos();
                 if(ruta === 'bebidas') cargarBebidas();
-            } else { mostrarAlerta("No se pudo eliminar el registro.", 'error'); }
+            } else { mostrarAlerta("No se permite eliminar un objeto en uso.", 'error'); }
         }
     </script>
 </body>
